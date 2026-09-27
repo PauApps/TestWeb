@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FileDown, Layers, FileText, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { FileDown, Layers, FileText, Image as ImageIcon, Loader2, Sparkles } from 'lucide-react';
 import { Modal, Button, Badge, useToast } from './ui';
 import { PrototypeDefinition } from '../prototypes/registry';
 import { exportPrototypeToPdf, captureMockScreenshot } from '../utils/pdfExport';
+import { PromptGeneratorModal } from './PromptGeneratorModal';
 
 interface PdfExportModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export const PdfExportModal: React.FC<PdfExportModalProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [progressMsg, setProgressMsg] = useState('');
   const [screenshot, setScreenshot] = useState<string>('');
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
 
   // Capture screenshot when modal opens
   useEffect(() => {
@@ -47,6 +49,7 @@ export const PdfExportModal: React.FC<PdfExportModalProps> = ({
   };
 
   return (
+    <>
     <Modal
       isOpen={isOpen}
       onClose={onClose}
@@ -124,10 +127,21 @@ export const PdfExportModal: React.FC<PdfExportModalProps> = ({
         </div>
 
         {/* 1. Overview */}
-        <div className="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-          <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-            <FileText className="w-4 h-4 text-brand-600" />
-            <span>1. Visió Global del Mock</span>
+        <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
+              <FileText className="w-4 h-4 text-brand-600" />
+              <span>1. Visió Global del Mock</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsPromptModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-purple-600 hover:bg-purple-700 text-white shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+              title="Generar Prompt per a IA triant quines seccions implementar"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-purple-200" />
+              <span>Generar Prompt per a IA</span>
+            </button>
           </div>
           <p className="text-slate-600 leading-relaxed text-xs sm:text-sm">
             {prototype.overview || prototype.description}
@@ -168,5 +182,11 @@ export const PdfExportModal: React.FC<PdfExportModalProps> = ({
         </div>
       </div>
     </Modal>
+    <PromptGeneratorModal
+      isOpen={isPromptModalOpen}
+      onClose={() => setIsPromptModalOpen(false)}
+      prototype={prototype}
+    />
+    </>
   );
 };

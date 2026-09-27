@@ -5,7 +5,8 @@ import {
   Minimize2,
   HelpCircle,
   Share2,
-  FileDown,
+  FileText,
+  Sparkles,
 } from 'lucide-react';
 import { PROTOTYPES } from './prototypes/registry';
 import { ToastProvider, Modal, Button } from './components/ui';
@@ -13,6 +14,7 @@ import { I18nProvider } from './i18n/I18nContext';
 import { LanguageSelector } from './components/LanguageSelector';
 import { PdfExportModal } from './components/PdfExportModal';
 import { ShareModal } from './components/ShareModal';
+import { PromptGeneratorModal } from './components/PromptGeneratorModal';
 
 const AppContent: React.FC = () => {
   // Check URL query parameters
@@ -34,6 +36,7 @@ const AppContent: React.FC = () => {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isPdfOpen, setIsPdfOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isPromptOpen, setIsPromptOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -120,20 +123,30 @@ const AppContent: React.FC = () => {
               {/* 1. IATA Language Selector */}
               <LanguageSelector />
 
-              {/* 2. PDF & Specs Export */}
+              {/* 2. Visió General & PDF */}
               <button
                 onClick={() => setIsPdfOpen(true)}
-                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-300 text-slate-700 transition-colors shadow-2xs"
-                title="Fitxa Tècnica / PDF"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-300 text-slate-700 transition-colors shadow-2xs cursor-pointer"
+                title="Visió General del Mock i Exportació a PDF"
               >
-                <FileDown className="w-3.5 h-3.5 text-brand-600 shrink-0" />
-                <span className="hidden sm:inline">PDF</span>
+                <FileText className="w-3.5 h-3.5 text-brand-600 shrink-0" />
+                <span className="hidden sm:inline">Visió General</span>
               </button>
 
-              {/* 3. Share Pure Link */}
+              {/* 3. Generar Prompt IA */}
+              <button
+                onClick={() => setIsPromptOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-purple-50 hover:bg-purple-100 border border-purple-300 text-purple-800 transition-colors shadow-2xs cursor-pointer"
+                title="Generar Prompt per a IA triant quines seccions implementar"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                <span className="hidden md:inline">Generar Prompt</span>
+              </button>
+
+              {/* 4. Share Pure Link */}
               <button
                 onClick={() => setIsShareOpen(true)}
-                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 transition-colors shadow-2xs"
+                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 transition-colors shadow-2xs cursor-pointer"
                 title="Compartir Mock (Mode Net)"
               >
                 <Share2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -190,6 +203,12 @@ const AppContent: React.FC = () => {
       <ShareModal
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
+        prototype={activePrototype}
+      />
+
+      <PromptGeneratorModal
+        isOpen={isPromptOpen}
+        onClose={() => setIsPromptOpen(false)}
         prototype={activePrototype}
       />
 

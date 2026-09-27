@@ -31,11 +31,11 @@ export const PROTOTYPES: PrototypeDefinition[] = [
     overview: 'Lloc web de presentació i captació per a una psicòloga sanitària autònoma. L\'objectiu és transmetre calidesa, rigor científic i confiança des del primer segon, reduint la fricció del pacient amb una primera sessió informativa gratuïta de 20 minuts i tarifes totalment transparents tant per a modalitat presencial com online.',
     sections: [
       {
-        title: 'Barra de Confiança Professional',
+        title: 'Barra Superior de Confiança',
         description: 'Dades de col·legiació oficial (COPC), ubicació física de la consulta i distintiu de 1a sessió gratuïta.',
       },
       {
-        title: 'Hero de Benvinguda & Crida a l\'Acció',
+        title: 'Hero Principal & Foto',
         description: 'Missatge tranquil·litzador enfocat al retrobament personal, fotografia professional i acció directa per demanar cita.',
       },
       {
@@ -43,7 +43,7 @@ export const PROTOTYPES: PrototypeDefinition[] = [
         description: 'Tres targetes clau: acceptació incondicional sense judicis, eines pràctiques per al dia a dia i enfocament basat en l\'evidència (TCC, ACT, Sistèmica).',
       },
       {
-        title: 'Selector Dinàmic d\'Especialitats',
+        title: 'Especialitats Interactives',
         description: 'Explorador interactiu dels motius de consulta: Ansietat, Autoestima, Límits, Dols i Teràpia de Parella amb llistat de símptomes.',
       },
       {
@@ -59,12 +59,20 @@ export const PROTOTYPES: PrototypeDefinition[] = [
         description: 'Preus clars i desglossats: Individual Online (55€), Individual Presencial (65€) i Parella (80€).',
       },
       {
-        title: 'Testimonis i FAQ',
-        description: 'Opinions respectant la confidencialitat clínica i acordió desplegable de dubtes freqüents.',
+        title: 'Testimonis de Pacients',
+        description: 'Opinions de pacients respectant la confidencialitat clínica i puntuacions.',
       },
       {
-        title: 'Modal Interactiu de Reserva de Cita',
-        description: 'Formulari complet per sol·licitar la primera presa de contacte amb preferència horària i confirmació immediata.',
+        title: 'Preguntes Freqüents (FAQ)',
+        description: 'Acordió desplegable amb els dubtes més habituals sobre teràpia, durada i pagament.',
+      },
+      {
+        title: 'Banner de Contacte Final',
+        description: 'Crida a l\'acció final per demanar la primera sessió gratuïta.',
+      },
+      {
+        title: 'Peu de Pàgina & PauApps',
+        description: 'Horaris d\'atenció, adreça, legal, política de privadesa i atribució PauApps.',
       },
     ],
   },

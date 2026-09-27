@@ -7,14 +7,17 @@ import {
   Share2,
   FileText,
   Sparkles,
+  Palette,
 } from 'lucide-react';
 import { PROTOTYPES } from './prototypes/registry';
 import { ToastProvider, Modal, Button } from './components/ui';
 import { I18nProvider } from './i18n/I18nContext';
+import { CustomizerProvider, useCustomizer } from './context/CustomizerContext';
 import { LanguageSelector } from './components/LanguageSelector';
 import { PdfExportModal } from './components/PdfExportModal';
 import { ShareModal } from './components/ShareModal';
 import { PromptGeneratorModal } from './components/PromptGeneratorModal';
+import { LiveCustomizerDrawer } from './components/LiveCustomizerDrawer';
 
 const AppContent: React.FC = () => {
   // Check URL query parameters
@@ -37,6 +40,7 @@ const AppContent: React.FC = () => {
   const [isPdfOpen, setIsPdfOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isPromptOpen, setIsPromptOpen] = useState(false);
+  const { setIsDrawerOpen } = useCustomizer();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -133,7 +137,17 @@ const AppContent: React.FC = () => {
                 <span className="hidden sm:inline">Visió General</span>
               </button>
 
-              {/* 3. Generar Prompt IA */}
+              {/* 3. Personalitzador en Viu */}
+              <button
+                onClick={() => setIsDrawerOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-800 transition-colors shadow-2xs cursor-pointer"
+                title="Personalitzar colors, estils, textos i seccions en temps real"
+              >
+                <Palette className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                <span className="hidden sm:inline">Personalitzar</span>
+              </button>
+
+              {/* 4. Generar Prompt IA */}
               <button
                 onClick={() => setIsPromptOpen(true)}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-purple-50 hover:bg-purple-100 border border-purple-300 text-purple-800 transition-colors shadow-2xs cursor-pointer"
@@ -212,6 +226,10 @@ const AppContent: React.FC = () => {
         prototype={activePrototype}
       />
 
+      <LiveCustomizerDrawer
+        onOpenPromptModal={() => setIsPromptOpen(true)}
+      />
+
       {/* Help Modal */}
       <Modal
         isOpen={isHelpOpen}
@@ -267,7 +285,9 @@ export const App: React.FC = () => {
   return (
     <ToastProvider>
       <I18nProvider>
-        <AppContent />
+        <CustomizerProvider>
+          <AppContent />
+        </CustomizerProvider>
       </I18nProvider>
     </ToastProvider>
   );

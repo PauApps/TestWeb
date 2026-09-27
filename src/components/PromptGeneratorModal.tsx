@@ -17,7 +17,13 @@ import {
   FileEdit,
 } from 'lucide-react';
 import { Modal, Button, Badge, useToast } from './ui';
-import { PrototypeDefinition, MockSection } from '../prototypes/registry';
+import { PrototypeDefinition } from '../prototypes/registry';
+import {
+  useCustomizer,
+  COLOR_PALETTES,
+  DESIGN_STYLES,
+  SectionVisibility,
+} from '../context/CustomizerContext';
 
 interface PromptGeneratorModalProps {
   isOpen: boolean;
@@ -25,155 +31,18 @@ interface PromptGeneratorModalProps {
   prototype: PrototypeDefinition;
 }
 
-// Preset color palettes
-interface ColorPalettePreset {
-  id: string;
-  name: string;
-  badge: string;
-  primary: string;
-  accent: string;
-  background: string;
-  previewColors: string[];
-  description: string;
-}
-
-const COLOR_PALETTES: ColorPalettePreset[] = [
-  {
-    id: 'calm-warm',
-    name: 'Calidesa & Benestar',
-    badge: 'Càlid & Acollidor',
-    primary: 'Terracota suau (#c86b4f)',
-    accent: 'Sorra / Beix càlid (#f7f4ee)',
-    background: 'Blanc lli i pedra natural',
-    previewColors: ['#c86b4f', '#e6a18d', '#f7f4ee', '#5f6f52'],
-    description: 'Tons naturals càlids, que transmeten hospitalitat, seguretat i confort humà.',
-  },
-  {
-    id: 'serene-blue',
-    name: 'Serè & Blau Clínic',
-    badge: 'Mèdic & Rigorós',
-    primary: 'Blau marí profund (#1e3a5f)',
-    accent: 'Cian / Turquesa suau (#0284c7)',
-    background: 'Blanc òptic i gris perla subtil',
-    previewColors: ['#1e3a5f', '#0284c7', '#e0f2fe', '#64748b'],
-    description: 'Serenor, confiança sanitària, netedat impecable i alta autoritat mèdica.',
-  },
-  {
-    id: 'natural-eco',
-    name: 'Natural & Botànic',
-    badge: 'Orgànic & Zen',
-    primary: 'Verd bosc / Sàlvia (#2d5a3f)',
-    accent: 'Verd molsa suau (#84a98c)',
-    background: 'Crema càlid (#faf8f5)',
-    previewColors: ['#2d5a3f', '#84a98c', '#cad2c5', '#f4f1de'],
-    description: 'Connexió amb la natura, equilibri vital, serenor i enfocament holístic.',
-  },
-  {
-    id: 'soft-blush',
-    name: 'Suau & Cura Personal',
-    badge: 'Empatia & Cura',
-    primary: 'Rosa empolsat elegant (#b76e79)',
-    accent: 'Lavanda suau (#9b8bb4)',
-    background: 'Rosa cremós ultra suau (#fff8f6)',
-    previewColors: ['#b76e79', '#9b8bb4', '#fceade', '#e5b3bb'],
-    description: 'Delicadesa, comprensió profunda, tacte sensible i absència total de judici.',
-  },
-  {
-    id: 'modern-tech',
-    name: 'Vibrant & Modern',
-    badge: 'Dynamic / Neo',
-    primary: 'Violeta / Indi elèctric (#6366f1)',
-    accent: 'Fúcsia suau / Cian (#ec4899)',
-    background: 'Pissarra clara o fosc modern',
-    previewColors: ['#4f46e5', '#6366f1', '#ec4899', '#f8fafc'],
-    description: 'Energètic, avantguardista, per a públic jove, emprenedors o enfocament digital.',
-  },
-  {
-    id: 'luxury-minimal',
-    name: 'Minimalista & Sobri',
-    badge: 'Luxe & Editorial',
-    primary: 'Negre carbó suau (#18181b)',
-    accent: 'Or vell / Bronze (#b45309)',
-    background: 'Blanc pur amb contrastos nets',
-    previewColors: ['#18181b', '#b45309', '#f59e0b', '#f4f4f5'],
-    description: 'Màxima sobrietat, elegància editorial, tipografia protagonista i molt d\'espai lliure.',
-  },
-];
-
-// Design Style options
-const DESIGN_STYLES = [
-  {
-    id: 'editorial',
-    label: 'Càlid & Editorial',
-    desc: 'Bordes arrodonits suaus, targetes flotants, textures acollidores i tipografia humana.',
-  },
-  {
-    id: 'minimalist',
-    label: 'Minimalista & Zen',
-    desc: 'Línies rectes i netes, molt d\'espai en blanc, sense ornaments superflus, màxima claredat.',
-  },
-  {
-    id: 'modern-saas',
-    label: 'Modern & Tecnològic',
-    desc: 'Gradients subtils, microinteraccions visuals, iconografia moderna i components interactius destacats.',
-  },
-  {
-    id: 'corporate',
-    label: 'Institucional & Seriós',
-    desc: 'Estructura ferma, colors compactes, gran pes a les credencials i certificacions.',
-  },
-];
-
-// Random variation profiles for instant 1-click variety
-const VARIATION_PROFILES = [
-  {
-    title: 'Consulta de Psicologia - Dr. Joan Maristany',
-    professional: 'Dr. Joan Maristany',
-    location: 'Girona (Barri Vell) & Sessions Online',
-    niche: 'Teràpia d\'ansietat, estrès laboral, burnout i lideratge conscient',
-    paletteId: 'serene-blue',
-    styleId: 'minimalist',
-  },
-  {
-    title: 'Clara Roura | Psicologia & Benestar Integral',
-    professional: 'Clara Roura',
-    location: 'Palma de Mallorca (Centre) & Consulta Virtual',
-    niche: 'Autoestima, gestió de límits personals i teràpia de parella',
-    paletteId: 'calm-warm',
-    styleId: 'editorial',
-  },
-  {
-    title: 'Arrel Psicologia Natural - Laia Fonts',
-    professional: 'Laia Fonts',
-    location: 'Vic & Manresa (i acompanyament online)',
-    niche: 'Gestió del dol, teràpia d\'acceptació i compromís (ACT) i mindfulness',
-    paletteId: 'natural-eco',
-    styleId: 'editorial',
-  },
-  {
-    title: 'Espai Ànima - Psicologia & Emocions',
-    professional: 'Marc Valls i Associats',
-    location: 'Barcelona (Gràcia) & Sessions per Videotrucada',
-    niche: 'Adolescents, joves adults i transicions personals o professionals',
-    paletteId: 'modern-tech',
-    styleId: 'modern-saas',
-  },
-  {
-    title: 'Mireia Puig - Psicologia Sanitària & Trauma',
-    professional: 'Mireia Puig',
-    location: 'Tarragona & Atenció Internacional a Expatriats',
-    niche: 'Teràpia EMDR, resolució de trauma, apego i diversitat LGBTIQ+',
-    paletteId: 'soft-blush',
-    styleId: 'editorial',
-  },
-  {
-    title: 'Institut Psicològic Balmes',
-    professional: 'Equip Clínic Dirigit per Dra. Helena Bosch',
-    location: 'Barcelona (Eixample Esquerre)',
-    niche: 'Clínica d\'adults, teràpia cognitiu-conductual d\'alta precisió i suport familiar',
-    paletteId: 'luxury-minimal',
-    styleId: 'corporate',
-  },
+export const PSYCHOLOGY_SECTIONS: { key: keyof SectionVisibility; title: string; desc: string }[] = [
+  { key: 'topBar', title: 'Barra Superior de Confiança', desc: 'Dades de col·legiació oficial (COPC), ubicació física de la consulta i distintiu de 1a sessió gratuïta.' },
+  { key: 'hero', title: 'Hero Principal & Foto', desc: 'Missatge tranquil·litzador enfocat al retrobament personal, fotografia professional i acció directa per demanar cita.' },
+  { key: 'values', title: 'Pilars Terapèutics', desc: 'Tres targetes clau: acceptació incondicional sense judicis, eines pràctiques per al dia a dia i enfocament basat en l\'evidència (TCC, ACT, Sistèmica).' },
+  { key: 'specialties', title: 'Especialitats Interactives', desc: 'Explorador interactiu dels motius de consulta: Ansietat, Autoestima, Límits, Dols i Teràpia de Parella amb llistat de símptomes.' },
+  { key: 'about', title: 'Sobre Mi & Despatx', desc: 'Acreditació acadèmica (UB), trajectòria clínica de +8 anys i fotografia de l\'espai acollidor de consulta.' },
+  { key: 'methodology', title: 'Metodologia Pas a Pas', desc: 'Procés terapèutic transparent en 4 etapes: Contacte → Avaluació → Treball i eines → Alta.' },
+  { key: 'pricing', title: 'Tarifes i Modalitats', desc: 'Preus clars i desglossats: Individual Online (55€), Individual Presencial (65€) i Parella (80€).' },
+  { key: 'testimonials', title: 'Testimonis de Pacients', desc: 'Opinions de pacients respectant la confidencialitat clínica i puntuacions.' },
+  { key: 'faq', title: 'Preguntes Freqüents (FAQ)', desc: 'Acordió desplegable amb els dubtes més habituals sobre teràpia, durada i pagament.' },
+  { key: 'ctaBanner', title: 'Banner de Contacte Final', desc: 'Crida a l\'acció final per demanar la primera sessió gratuïta.' },
+  { key: 'footer', title: 'Peu de Pàgina & PauApps', desc: 'Horaris d\'atenció, adreça, legal, política de privadesa i atribució PauApps.' },
 ];
 
 export const PromptGeneratorModal: React.FC<PromptGeneratorModalProps> = ({
@@ -184,89 +53,46 @@ export const PromptGeneratorModal: React.FC<PromptGeneratorModalProps> = ({
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
 
-  // 1. Dynamic Identity Customizations
-  const [customTitle, setCustomTitle] = useState(prototype.title);
-  const [customProfessional, setCustomProfessional] = useState(
-    prototype.id === 'web-psicologa' ? 'Neus Solé' : 'Equip del Projecte'
-  );
-  const [customLocation, setCustomLocation] = useState(
-    prototype.id === 'web-psicologa' ? 'Barcelona (Eixample) & Online' : 'Barcelona & En Línia'
-  );
-  const [customNiche, setCustomNiche] = useState(
-    prototype.id === 'web-psicologa'
-      ? 'Adults i parelles que busquen pau mental, eines contra l\'ansietat i creixement personal'
-      : 'Clients particulars i professionals que busquen servei de màxima qualitat'
-  );
-  const [customNotes, setCustomNotes] = useState('');
+  // Consume Shared Customizer Context (shared with Live Mock visualization)
+  const {
+    customTitle,
+    setCustomTitle,
+    customProfessional,
+    setCustomProfessional,
+    customLocation,
+    setCustomLocation,
+    customNiche,
+    setCustomNiche,
+    customNotes,
+    setCustomNotes,
+    paletteId,
+    setPaletteId,
+    currentPalette,
+    styleId,
+    setStyleId,
+    currentStyle,
+    sections,
+    toggleSection,
+    setAllSections,
+    randomizeVariation,
+  } = useCustomizer();
 
-  // 2. Palette & Visual Style
-  const [selectedPaletteId, setSelectedPaletteId] = useState<string>('calm-warm');
   const [customPaletteNotes, setCustomPaletteNotes] = useState('');
-  const [selectedStyleId, setSelectedStyleId] = useState<string>('editorial');
-
-  // 3. Sections to Implement
-  const [selectedSectionTitles, setSelectedSectionTitles] = useState<string[]>(() => {
-    return prototype.sections ? prototype.sections.map((s) => s.title) : [];
-  });
-
-  // Re-sync when prototype changes
-  React.useEffect(() => {
-    setCustomTitle(prototype.title);
-    if (prototype.id === 'web-psicologa') {
-      setCustomProfessional('Neus Solé');
-      setCustomLocation('Barcelona (Eixample) & Online');
-      setCustomNiche('Adults i parelles que busquen pau mental, eines contra l\'ansietat i creixement personal');
-    } else {
-      setCustomProfessional('Equip del Projecte');
-      setCustomLocation('Barcelona & En Línia');
-      setCustomNiche('Clients particulars i professionals');
-    }
-    if (prototype.sections) {
-      setSelectedSectionTitles(prototype.sections.map((s) => s.title));
-    } else {
-      setSelectedSectionTitles([]);
-    }
-  }, [prototype.id]);
 
   // Options
   const [framework, setFramework] = useState<'react-tailwind' | 'html-tailwind' | 'nextjs'>('react-tailwind');
   const [language, setLanguage] = useState<'ca' | 'es' | 'en'>('ca');
   const [includeMockData, setIncludeMockData] = useState(true);
 
-  const allSections: MockSection[] = prototype.sections || [];
-
-  const handleToggleSection = (title: string) => {
-    setSelectedSectionTitles((prev) =>
-      prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]
-    );
-  };
-
-  const handleSelectAll = () => {
-    setSelectedSectionTitles(allSections.map((s) => s.title));
-  };
-
-  const handleDeselectAll = () => {
-    setSelectedSectionTitles([]);
-  };
-
   // Magic 1-click Random Variation Generator
   const handleRandomVariation = () => {
-    const randomProfile =
-      VARIATION_PROFILES[Math.floor(Math.random() * VARIATION_PROFILES.length)];
-    setCustomTitle(randomProfile.title);
-    setCustomProfessional(randomProfile.professional);
-    setCustomLocation(randomProfile.location);
-    setCustomNiche(randomProfile.niche);
-    setSelectedPaletteId(randomProfile.paletteId);
-    setSelectedStyleId(randomProfile.styleId);
-    toast('✨ S\'ha generat una nova combinació de marca, colors i estil!', 'info');
+    randomizeVariation();
+    toast('✨ S\'ha aplicat una nova combinació de marca, colors i estil al mock i al prompt!', 'info');
   };
 
   // Generate the comprehensive prompt
   const generatedPrompt = useMemo(() => {
-    const selectedSections = allSections.filter((s) =>
-      selectedSectionTitles.includes(s.title)
-    );
+    const selectedSections = PSYCHOLOGY_SECTIONS.filter((s) => sections[s.key]);
 
     const langNames = {
       ca: 'Català',
@@ -280,12 +106,9 @@ export const PromptGeneratorModal: React.FC<PromptGeneratorModalProps> = ({
       'nextjs': 'Next.js 14+ (App Router) amb TypeScript, Tailwind CSS i Server/Client Components',
     };
 
-    const activePalette = COLOR_PALETTES.find((p) => p.id === selectedPaletteId) || COLOR_PALETTES[0];
-    const activeStyle = DESIGN_STYLES.find((s) => s.id === selectedStyleId) || DESIGN_STYLES[0];
-
     const sectionsList = selectedSections.length > 0
       ? selectedSections
-          .map((s, idx) => `### ${idx + 1}. ${s.title}\n- **Objectiu i contingut**: ${s.description}`)
+          .map((s, idx) => `### ${idx + 1}. ${s.title}\n- **Objectiu i contingut**: ${s.desc}`)
           .join('\n\n')
       : '(No s\'ha seleccionat cap secció específica. Implementa una estructura completa basada en la visió general.)';
 
@@ -309,16 +132,16 @@ ${customNotes.trim() ? `- **Instruccions / Requisits especials del client**:\n  
 
 ## 2. PALETA CROMÀTICA I DIRECCIÓ D'ESTIL VISUAL
 Aquesta web ha de tenir una identitat visual pròpia i distingible, evitant semblar una plantilla genèrica o idèntica a altres del mateix sector:
-- **Nom de la Paleta**: ${activePalette.name} (${activePalette.badge})
+- **Nom de la Paleta**: ${currentPalette.name} (${currentPalette.badge})
 - **Colors principals**:
-  * Color Primari: ${activePalette.primary}
-  * Color d'Accent / Detalls: ${activePalette.accent}
-  * Fons i Superfícies: ${activePalette.background}
+  * Color Primari: ${currentPalette.primary}
+  * Color d'Accent / Detalls: ${currentPalette.accent}
+  * Fons i Superfícies: ${currentPalette.bg} / ${currentPalette.surface}
 ${customPaletteNotes.trim() ? `- **Ajustos cromàtics addicionals sol·licitats**: ${customPaletteNotes.trim()}` : ''}
-- **Estil Visual & Look & Feel**: ${activeStyle.label}
-  * Característiques de disseny: ${activeStyle.desc}
+- **Estil Visual & Look & Feel**: ${currentStyle.label}
+  * Característiques de disseny: ${currentStyle.desc}
 - **Tipografia i Maquetació**:
-  * Utilitza una tipografia moderna i llegible (sans-serif neta com Inter o serif editorial per a encapçalaments si escau).
+  * Utilitza tipografia ${currentStyle.fontHeading === 'font-serif' ? 'editorial serif per als titulars' : 'moderna sans-serif'}.
   * Distribueix generosament els espais en blanc (\`py-16\`, \`gap-8\`, \`max-w-6xl\`) per oferir una experiència de lectura relaxada i no aclaparadora.
 
 ---
@@ -330,7 +153,7 @@ ${includeMockData ? '- **Dades simulades realistes**: Inclou textos complets i v
 
 ---
 
-## 4. SECCIONS SELECCIONADES PER IMPLEMENTAR (${selectedSections.length} seccions)
+## 4. SECCIONS SELECCIONADES PER IMPLEMENTAR (${selectedSections.length} de ${PSYCHOLOGY_SECTIONS.length} seccions)
 Implementa amb detall cadascuna de les ${selectedSections.length} seccions seleccionades a continuació, assegurant que flueixin amb coherència:
 
 ${sectionsList}
@@ -357,14 +180,15 @@ ${sectionsList}
     customLocation,
     customNiche,
     customNotes,
-    selectedPaletteId,
+    paletteId,
+    currentPalette,
     customPaletteNotes,
-    selectedStyleId,
-    selectedSectionTitles,
+    styleId,
+    currentStyle,
+    sections,
     framework,
     language,
     includeMockData,
-    allSections,
   ]);
 
   const handleCopy = async () => {
@@ -536,11 +360,11 @@ ${sectionsList}
           {/* Color Palettes Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1">
             {COLOR_PALETTES.map((pal) => {
-              const isSelected = selectedPaletteId === pal.id;
+              const isSelected = paletteId === pal.id;
               return (
                 <div
                   key={pal.id}
-                  onClick={() => setSelectedPaletteId(pal.id)}
+                  onClick={() => setPaletteId(pal.id)}
                   className={`p-3 rounded-xl border cursor-pointer transition-all ${
                     isSelected
                       ? 'bg-white border-purple-500 ring-2 ring-purple-500/20 shadow-sm'
@@ -583,11 +407,11 @@ ${sectionsList}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
               {DESIGN_STYLES.map((style) => {
-                const isSelected = selectedStyleId === style.id;
+                const isSelected = styleId === style.id;
                 return (
                   <div
                     key={style.id}
-                    onClick={() => setSelectedStyleId(style.id)}
+                    onClick={() => setStyleId(style.id)}
                     className={`p-2.5 rounded-xl border cursor-pointer transition-all ${
                       isSelected
                         ? 'bg-purple-50/70 border-purple-400 text-slate-900 shadow-2xs'
@@ -626,13 +450,13 @@ ${sectionsList}
               <Layers className="w-4 h-4 text-purple-600" />
               <span>3. Tria quines seccions vols implementar</span>
               <span className="text-xs font-normal text-slate-500">
-                ({selectedSectionTitles.length} de {allSections.length} seleccionades)
+                ({PSYCHOLOGY_SECTIONS.filter((s) => sections[s.key]).length} de {PSYCHOLOGY_SECTIONS.length} seleccionades)
               </span>
             </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={handleSelectAll}
+                onClick={() => setAllSections(true)}
                 className="text-[11px] font-semibold text-purple-700 hover:text-purple-900 hover:underline cursor-pointer"
               >
                 Seleccionar totes
@@ -640,7 +464,7 @@ ${sectionsList}
               <span className="text-slate-300">|</span>
               <button
                 type="button"
-                onClick={handleDeselectAll}
+                onClick={() => setAllSections(false)}
                 className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 hover:underline cursor-pointer"
               >
                 Desmarcar totes
@@ -649,12 +473,12 @@ ${sectionsList}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-            {allSections.map((sec, idx) => {
-              const isSelected = selectedSectionTitles.includes(sec.title);
+            {PSYCHOLOGY_SECTIONS.map((sec, idx) => {
+              const isSelected = sections[sec.key];
               return (
                 <div
-                  key={idx}
-                  onClick={() => handleToggleSection(sec.title)}
+                  key={sec.key}
+                  onClick={() => toggleSection(sec.key)}
                   className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 ${
                     isSelected
                       ? 'bg-purple-50/70 border-purple-300 shadow-2xs text-slate-900'
@@ -673,7 +497,7 @@ ${sectionsList}
                       {idx + 1}. {sec.title}
                     </div>
                     <div className="text-[11px] text-slate-500 line-clamp-2 mt-0.5">
-                      {sec.description}
+                      {sec.desc}
                     </div>
                   </div>
                 </div>
